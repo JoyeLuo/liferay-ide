@@ -14,6 +14,7 @@ import java.io.FileInputStream;
 import java.io.IOException;
 import java.nio.charset.StandardCharsets;
 import java.nio.file.Files;
+import java.util.ArrayList;
 import java.util.List;
 
 import org.junit.Before;
@@ -54,7 +55,7 @@ public class GradleParseTests
 
         assertEquals( 27, dependenceLineNum );
 
-        Files.write( outputfile.toPath(), updater.getGradleFileContents(), StandardCharsets.UTF_8 );
+        Files.write( outputfile.toPath(), convertToLinuxEncoding( updater ), StandardCharsets.UTF_8 );
 
         final File expectedOutputFile = new File( "projects/testParseOutput/testParse.gradle" );
 
@@ -77,7 +78,7 @@ public class GradleParseTests
 
         assertEquals( 24, dependenceLineNum );
 
-        Files.write( outputfile.toPath(), updater.getGradleFileContents(), StandardCharsets.UTF_8 );
+        Files.write( outputfile.toPath(), convertToLinuxEncoding( updater ), StandardCharsets.UTF_8 );
 
         final File expectedOutputFile = new File( "projects/testParseOutput/testParse2.gradle" );
 
@@ -100,7 +101,7 @@ public class GradleParseTests
 
         assertEquals( -1, dependenceLineNum );
 
-        Files.write( outputfile.toPath(), updater.getGradleFileContents(), StandardCharsets.UTF_8 );
+        Files.write( outputfile.toPath(), convertToLinuxEncoding( updater ), StandardCharsets.UTF_8 );
 
         final File expectedOutputFile = new File( "projects/testParseOutput/testParse3.gradle" );
 
@@ -123,7 +124,7 @@ public class GradleParseTests
 
         assertEquals( 23, dependenceLineNum );
 
-        Files.write( outputfile.toPath(), updater.getGradleFileContents(), StandardCharsets.UTF_8 );
+        Files.write( outputfile.toPath(), convertToLinuxEncoding( updater ), StandardCharsets.UTF_8 );
 
         final File outputFile = new File( "projects/testParseOutput/testParse4.gradle" );
 
@@ -146,7 +147,7 @@ public class GradleParseTests
 
         assertEquals( 24, dependenceLineNum );
 
-        Files.write( outputfile.toPath(), updater.getGradleFileContents(), StandardCharsets.UTF_8 );
+        Files.write( outputfile.toPath(), convertToLinuxEncoding( updater ), StandardCharsets.UTF_8 );
 
         final File outputFile = new File( "projects/testParseOutput/testParse5.gradle" );
 
@@ -189,6 +190,37 @@ public class GradleParseTests
         List<GradleDependency> allDependencies = updater.getAllDependencies();
 
         assertEquals( 3, allDependencies.size() );
+    }
+
+    private List<String> convertToLinuxEncoding( GradleDependencyUpdater updater )
+    {
+        List<String> gradleFileContents = updater.getGradleFileContents();
+        List<String> newGradleContent = new ArrayList<>();
+
+        if( CoreUtil.isWindows() )
+        {
+            for( String string : gradleFileContents )
+            {
+                string = string.replace( "\n", "\r\n" );
+                newGradleContent.add( string );
+            }
+
+            return newGradleContent;
+        }
+        else if( CoreUtil.isMac() )
+        {
+            for( String string : gradleFileContents )
+            {
+                string = string.replace( "\n", "\r" );
+                newGradleContent.add( string );
+            }
+
+            return newGradleContent;
+        }
+        else
+        {
+            return gradleFileContents;
+        }
     }
 
 }
