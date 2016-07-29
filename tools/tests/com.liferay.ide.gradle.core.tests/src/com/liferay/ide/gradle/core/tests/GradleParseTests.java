@@ -59,7 +59,7 @@ public class GradleParseTests
         final File expectedOutputFile = new File( "projects/testParseOutput/testParse.gradle" );
 
         assertEquals(
-            CoreUtil.readStreamToString( new FileInputStream( expectedOutputFile ) ),
+            convertToLinuxEncoding(CoreUtil.readStreamToString( new FileInputStream( expectedOutputFile ) )),
             CoreUtil.readStreamToString( new FileInputStream( outputfile ) ) );
     }
 
@@ -82,7 +82,7 @@ public class GradleParseTests
         final File expectedOutputFile = new File( "projects/testParseOutput/testParse2.gradle" );
 
         assertEquals(
-            CoreUtil.readStreamToString( new FileInputStream( expectedOutputFile ) ),
+            convertToLinuxEncoding(CoreUtil.readStreamToString( new FileInputStream( expectedOutputFile ) )),
             CoreUtil.readStreamToString( new FileInputStream( outputfile ) ) );
     }
 
@@ -105,7 +105,7 @@ public class GradleParseTests
         final File expectedOutputFile = new File( "projects/testParseOutput/testParse3.gradle" );
 
         assertEquals(
-            CoreUtil.readStreamToString( new FileInputStream( expectedOutputFile ) ),
+            convertToLinuxEncoding(CoreUtil.readStreamToString( new FileInputStream( expectedOutputFile ) )),
             CoreUtil.readStreamToString( new FileInputStream( outputfile ) ) );
     }
 
@@ -189,6 +189,27 @@ public class GradleParseTests
         List<GradleDependency> allDependencies = updater.getAllDependencies();
 
         assertEquals( 3, allDependencies.size() );
+    }
+
+    private String convertToLinuxEncoding( String contents )
+    {
+
+        if( CoreUtil.isWindows() )
+        {
+            contents = contents.replace( "\r\n", "\n" );
+
+            return contents;
+        }
+        else if( CoreUtil.isMac() )
+        {
+            contents = contents.replace( "\r\n", "\n" );
+
+            return contents;
+        }
+        else
+        {
+            return contents;
+        }
     }
 
 }
