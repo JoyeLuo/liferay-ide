@@ -79,7 +79,7 @@ public class BundlePublishFullRemove extends BundlePublishOperation
 
                 if( status == null || status.isOK() ) // remote uninstall succeedded
                 {
-                    status = localUninstall( bundleProject, symbolicName );
+                    status = localUninstall( bundleProject );
                 }
 
                 if( status.isOK() )
@@ -124,7 +124,7 @@ public class BundlePublishFullRemove extends BundlePublishOperation
         }
     }
 
-    private IStatus localUninstall( IBundleProject bundleProject , String symbolicName )
+    private IStatus localUninstall( IBundleProject bundleProject )
     {
         IStatus retval = Status.OK_STATUS;
 
@@ -133,13 +133,10 @@ public class BundlePublishFullRemove extends BundlePublishOperation
         final List<File> moduleFiles = new ArrayList<File>();
 
         final IPath modulesPath = runtime.getPortalBundle().getModulesPath();
-        findFilesInPath( modulesPath.toFile(), symbolicName, moduleFiles );
 
         final IPath deployPath = runtime.getPortalBundle().getAutoDeployPath();
-        findFilesInPath( deployPath.toFile(), symbolicName, moduleFiles );
 
         final IPath appServerDeployPath = runtime.getPortalBundle().getAppServerDeployDir();
-        findFilesInPath( appServerDeployPath.toFile(), symbolicName, moduleFiles );
 
         try
         {
