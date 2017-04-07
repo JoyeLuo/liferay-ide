@@ -18,6 +18,8 @@ import com.liferay.ide.core.ILiferayConstants;
 import com.liferay.ide.core.util.CoreUtil;
 import com.liferay.ide.core.util.LaunchHelper;
 import com.liferay.ide.project.core.AbstractProjectBuilder;
+import com.liferay.ide.project.core.util.ProjectUtil;
+import com.liferay.ide.project.core.util.SearchFilesVisitor;
 
 import java.io.File;
 import java.io.FileOutputStream;
@@ -316,6 +318,14 @@ public class MavenProjectBuilder extends AbstractProjectBuilder
         return retVal;
     }
 
+    private boolean isServiceBuilderProject( IProject project, String pluginType, MavenProject parentProject  )
+    {
+        final List<IFile> serviceXmls = ( new SearchFilesVisitor() ).searchFiles( project, "service.xml" );
+
+        return serviceXmls != null && serviceXmls.size() > 0 &&
+            pluginType.equalsIgnoreCase( ILiferayMavenConstants.DEFAULT_PLUGIN_TYPE ) && parentProject != null;
+    }
+
     public IFile preBuildService( IProgressMonitor monitor ) throws CoreException
     {
         IProject project = getProject();
@@ -402,9 +412,31 @@ public class MavenProjectBuilder extends AbstractProjectBuilder
     public boolean runMavenGoal( final IProject project, final String goal, final IProgressMonitor monitor )
         throws CoreException
     {
-        final IMavenProjectFacade facade = MavenUtil.getProjectFacade( project, monitor );
+        boolean retval = false;
 
-        return execMavenLaunch( project, goal, facade, monitor );
+        final IMavenProjectFacade facade = MavenUtil.getProjectFacade( project, monitor );
+        String pluginType = MavenUtil.getLiferayMavenPluginType( facade.getMavenProject( monitor ) );
+
+        if( pluginType == null )
+        {
+            pluginType = ILiferayMavenConstants.DEFAULT_PLUGIN_TYPE;
+        }
+
+        final MavenProject parentProject = facade.getMavenProject( monitor ).getParent();
+
+        if( isServiceBuilderProject( project, pluginType, parentProject ) )
+        {
+            retval = execMavenLaunch(
+                ProjectUtil.getProject( parentProject.getName() ),
+                " package -am -pl " + project.getName(),
+                MavenUtil.getProjectFacade( project, monitor ), monitor );
+        }
+        else
+        {
+            retval = execMavenLaunch( project, goal, facade, monitor );
+        }
+
+        return retval;
     }
 
     protected static class Msgs extends NLS
