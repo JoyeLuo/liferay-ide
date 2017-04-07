@@ -16,9 +16,8 @@ package com.liferay.ide.maven.core;
 
 import com.liferay.ide.core.ILiferayConstants;
 import com.liferay.ide.core.util.CoreUtil;
-import com.liferay.ide.core.util.LaunchHelper;
 import com.liferay.ide.project.core.AbstractProjectBuilder;
-
+import com.liferay.ide.project.core.util.ProjectUtil;
 import java.io.File;
 import java.io.FileOutputStream;
 import java.util.Arrays;
@@ -37,18 +36,12 @@ import org.eclipse.core.resources.IResource;
 import org.eclipse.core.resources.ResourcesPlugin;
 import org.eclipse.core.resources.WorkspaceJob;
 import org.eclipse.core.runtime.CoreException;
-import org.eclipse.core.runtime.IPath;
 import org.eclipse.core.runtime.IProgressMonitor;
 import org.eclipse.core.runtime.IStatus;
 import org.eclipse.core.runtime.NullProgressMonitor;
 import org.eclipse.core.runtime.Path;
 import org.eclipse.core.runtime.Status;
 import org.eclipse.core.runtime.SubMonitor;
-import org.eclipse.debug.core.DebugPlugin;
-import org.eclipse.debug.core.ILaunchConfigurationType;
-import org.eclipse.debug.core.ILaunchConfigurationWorkingCopy;
-import org.eclipse.debug.core.ILaunchManager;
-import org.eclipse.jdt.launching.IJavaLaunchConfigurationConstants;
 import org.eclipse.m2e.core.MavenPlugin;
 import org.eclipse.m2e.core.embedder.ICallable;
 import org.eclipse.m2e.core.embedder.IMaven;
@@ -56,7 +49,6 @@ import org.eclipse.m2e.core.embedder.IMavenExecutionContext;
 import org.eclipse.m2e.core.internal.IMavenConstants;
 import org.eclipse.m2e.core.project.IMavenProjectFacade;
 import org.eclipse.m2e.core.project.IMavenProjectRegistry;
-import org.eclipse.m2e.core.project.ResolverConfiguration;
 import org.eclipse.osgi.util.NLS;
 
 
@@ -66,14 +58,6 @@ import org.eclipse.osgi.util.NLS;
 @SuppressWarnings( "restriction" )
 public class MavenProjectBuilder extends AbstractProjectBuilder
 {
-    private final String ATTR_GOALS = "M2_GOALS";
-    private final String ATTR_POM_DIR = IJavaLaunchConfigurationConstants.ATTR_WORKING_DIRECTORY;
-    private final String ATTR_PROFILES = "M2_PROFILES";
-    private final String ATTR_SKIP_TESTS = "M2_SKIP_TESTS";
-    private final String ATTR_WORKSPACE_RESOLUTION = "M2_WORKSPACE_RESOLUTION";
-
-    private final String LAUNCH_CONFIGURATION_TYPE_ID = "org.eclipse.m2e.Maven2LaunchConfigurationType";
-
     protected final IMaven maven = MavenPlugin.getMaven();
 
     protected final IMavenProjectRegistry projectManager = MavenPlugin.getMavenProjectRegistry();
@@ -228,46 +212,6 @@ public class MavenProjectBuilder extends AbstractProjectBuilder
         return retval;
     }
 
-    private boolean execMavenLaunch(
-        final IProject project, final String goal, final IMavenProjectFacade facade, IProgressMonitor monitor )
-        throws CoreException
-    {
-        final ILaunchManager launchManager = DebugPlugin.getDefault().getLaunchManager();
-        final ILaunchConfigurationType launchConfigurationType =
-            launchManager.getLaunchConfigurationType( LAUNCH_CONFIGURATION_TYPE_ID );
-        final IPath basedirLocation = project.getLocation();
-        final String newName = launchManager.generateLaunchConfigurationName( basedirLocation.lastSegment() );
-
-        final ILaunchConfigurationWorkingCopy workingCopy = launchConfigurationType.newInstance( null, newName );
-        workingCopy.setAttribute(
-            IJavaLaunchConfigurationConstants.ATTR_VM_ARGUMENTS, "-Dmaven.multiModuleProjectDirectory" );
-        workingCopy.setAttribute( ATTR_POM_DIR, basedirLocation.toString() );
-        workingCopy.setAttribute( ATTR_GOALS, goal );
-//        workingCopy.setAttribute( ATTR_UPDATE_SNAPSHOTS, true );
-        workingCopy.setAttribute( ATTR_WORKSPACE_RESOLUTION, true );
-        workingCopy.setAttribute( ATTR_SKIP_TESTS, true );
-
-        if( facade != null )
-        {
-            final ResolverConfiguration configuration = facade.getResolverConfiguration();
-
-            final String selectedProfiles = configuration.getSelectedProfiles();
-
-            if( selectedProfiles != null && selectedProfiles.length() > 0 )
-            {
-                workingCopy.setAttribute( ATTR_PROFILES, selectedProfiles );
-            }
-
-            new LaunchHelper().launch( workingCopy, "run", monitor );
-
-            return true;
-        }
-        else
-        {
-            return false;
-        }
-    }
-
     protected IStatus executeMaven( final IMavenProjectFacade projectFacade,
                                     final ICallable<IStatus> callable,
                                     IProgressMonitor monitor ) throws CoreException
@@ -402,9 +346,30 @@ public class MavenProjectBuilder extends AbstractProjectBuilder
     public boolean runMavenGoal( final IProject project, final String goal, final IProgressMonitor monitor )
         throws CoreException
     {
-        final IMavenProjectFacade facade = MavenUtil.getProjectFacade( project, monitor );
+        boolean retval = false;
 
-        return execMavenLaunch( project, goal, facade, monitor );
+        final IMavenProjectFacade facade = MavenUtil.getProjectFacade( project, monitor );
+        String pluginType = MavenUtil.getLiferayMavenPluginType( facade.getMavenProject( monitor ) );
+
+        if( pluginType == null )
+        {
+            pluginType = ILiferayMavenConstants.DEFAULT_PLUGIN_TYPE;
+        }
+
+        final MavenProject parentProject = facade.getMavenProject( monitor ).getParent();
+
+        if( MavenUtil.isMavenServiceBuilderProject( project, pluginType, parentProject ) )
+        {
+            retval = MavenUtil.execMavenLaunch(
+                ProjectUtil.getProject( parentProject.getName() ), " package -am -pl " + project.getName(),
+                MavenUtil.getProjectFacade( project, monitor ), monitor );
+        }
+        else
+        {
+            retval = MavenUtil.execMavenLaunch( project, goal, facade, monitor );
+        }
+
+        return retval;
     }
 
     protected static class Msgs extends NLS
@@ -425,7 +390,7 @@ public class MavenProjectBuilder extends AbstractProjectBuilder
     {
         final IMavenProjectFacade facade = MavenUtil.getProjectFacade( project, monitor );
 
-        if( execMavenLaunch( project, "liferay:init-bundle", facade, monitor ) )
+        if( MavenUtil.execMavenLaunch( project, "liferay:init-bundle", facade, monitor ) )
         {
             return Status.OK_STATUS;
         }

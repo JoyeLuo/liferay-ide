@@ -15,8 +15,10 @@
 package com.liferay.ide.maven.core;
 
 import com.liferay.ide.core.util.CoreUtil;
+import com.liferay.ide.core.util.LaunchHelper;
 import com.liferay.ide.core.util.NodeUtil;
 import com.liferay.ide.project.core.model.NewLiferayProfile;
+import com.liferay.ide.project.core.util.SearchFilesVisitor;
 import com.liferay.ide.server.core.ILiferayRuntime;
 import com.liferay.ide.server.util.ServerUtil;
 
@@ -53,6 +55,11 @@ import org.eclipse.core.runtime.MultiStatus;
 import org.eclipse.core.runtime.NullProgressMonitor;
 import org.eclipse.core.runtime.Path;
 import org.eclipse.core.runtime.Status;
+import org.eclipse.debug.core.DebugPlugin;
+import org.eclipse.debug.core.ILaunchConfigurationType;
+import org.eclipse.debug.core.ILaunchConfigurationWorkingCopy;
+import org.eclipse.debug.core.ILaunchManager;
+import org.eclipse.jdt.launching.IJavaLaunchConfigurationConstants;
 import org.eclipse.m2e.core.MavenPlugin;
 import org.eclipse.m2e.core.embedder.IMaven;
 import org.eclipse.m2e.core.embedder.IMavenConfiguration;
@@ -84,6 +91,13 @@ import org.w3c.dom.Node;
 @SuppressWarnings( "restriction" )
 public class MavenUtil
 {
+    private final static String ATTR_GOALS = "M2_GOALS";
+    private final static String ATTR_POM_DIR = IJavaLaunchConfigurationConstants.ATTR_WORKING_DIRECTORY;
+    private final static String ATTR_PROFILES = "M2_PROFILES";
+    private final static String ATTR_SKIP_TESTS = "M2_SKIP_TESTS";
+    private final static String ATTR_UPDATE_SNAPSHOTS = "M2_UPDATE_SNAPSHOTS";
+    private final static String ATTR_WORKSPACE_RESOLUTION = "M2_WORKSPACE_RESOLUTION";
+    private final static String LAUNCH_CONFIGURATION_TYPE_ID = "org.eclipse.m2e.Maven2LaunchConfigurationType";
 
     private static final Pattern MAJOR_MINOR_VERSION = Pattern.compile( "([0-9]\\.[0-9])\\..*" );
 
@@ -187,6 +201,46 @@ public class MavenUtil
         }
 
         return Status.OK_STATUS;
+    }
+
+    public static boolean execMavenLaunch(
+        final IProject project, final String goal, final IMavenProjectFacade facade, IProgressMonitor monitor )
+        throws CoreException
+    {
+        final ILaunchManager launchManager = DebugPlugin.getDefault().getLaunchManager();
+        final ILaunchConfigurationType launchConfigurationType =
+            launchManager.getLaunchConfigurationType( LAUNCH_CONFIGURATION_TYPE_ID );
+        final IPath basedirLocation = project.getLocation();
+        final String newName = launchManager.generateLaunchConfigurationName( basedirLocation.lastSegment() );
+
+        final ILaunchConfigurationWorkingCopy workingCopy = launchConfigurationType.newInstance( null, newName );
+        workingCopy.setAttribute(
+            IJavaLaunchConfigurationConstants.ATTR_VM_ARGUMENTS, "-Dmaven.multiModuleProjectDirectory" );
+        workingCopy.setAttribute( ATTR_POM_DIR, basedirLocation.toString() );
+        workingCopy.setAttribute( ATTR_GOALS, goal );
+        workingCopy.setAttribute( ATTR_UPDATE_SNAPSHOTS, true );
+        workingCopy.setAttribute( ATTR_WORKSPACE_RESOLUTION, true );
+        workingCopy.setAttribute( ATTR_SKIP_TESTS, true );
+
+        if( facade != null )
+        {
+            final ResolverConfiguration configuration = facade.getResolverConfiguration();
+
+            final String selectedProfiles = configuration.getSelectedProfiles();
+
+            if( selectedProfiles != null && selectedProfiles.length() > 0 )
+            {
+                workingCopy.setAttribute( ATTR_PROFILES, selectedProfiles );
+            }
+
+            new LaunchHelper().launch( workingCopy, "run", monitor );
+
+            return true;
+        }
+        else
+        {
+            return false;
+        }
     }
 
     public static IStatus executeMojoGoal( final IMavenProjectFacade facade,
@@ -617,6 +671,14 @@ public class MavenUtil
     {
         return project != null && project.exists() && project.isAccessible() &&
             ( project.hasNature( IMavenConstants.NATURE_ID ) || project.getFile( IMavenConstants.POM_FILE_NAME ).exists() );
+    }
+
+    public static boolean isMavenServiceBuilderProject( IProject project, String pluginType, MavenProject parentProject )
+    {
+        final List<IFile> serviceXmls = ( new SearchFilesVisitor() ).searchFiles( project, "service.xml" );
+
+        return serviceXmls != null && serviceXmls.size() > 0 &&
+            pluginType.equalsIgnoreCase( ILiferayMavenConstants.DEFAULT_PLUGIN_TYPE ) && parentProject != null;
     }
 
     public static boolean isPomFile( IFile pomFile )
