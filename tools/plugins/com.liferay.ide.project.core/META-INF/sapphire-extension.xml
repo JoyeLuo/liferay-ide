@@ -50,6 +50,14 @@
     </service>
 
     <service>
+        <id>Sapphire.ValueLabelService.WorkspaceProjectProvider</id>
+        <context>Sapphire.Property.MetaModel</context>
+        <implementation>com.liferay.ide.project.core.model.internal.ProjectProviderValueLabelService</implementation>
+        <condition>com.liferay.ide.project.core.model.internal.WorkspaceProjectProviderValueServiceConditon</condition>
+        <overrides>Sapphire.ValueLabelService.Default</overrides>
+    </service>
+
+    <service>
         <id>Sapphire.ValueImageService.PortletFramework</id>
         <overrides>Sapphire.ValueImageService.Default</overrides>
         <context>Sapphire.Property.MetaModel</context>
