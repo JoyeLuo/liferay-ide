@@ -20,6 +20,7 @@ import com.liferay.ide.core.util.StringPool;
 import com.liferay.ide.project.core.ProjectCore;
 import com.liferay.ide.project.core.util.LiferayWorkspaceUtil;
 import com.liferay.ide.project.core.util.ProjectUtil;
+import com.liferay.ide.project.core.util.RepositoryUtil;
 import com.liferay.ide.project.core.util.ValidationUtil;
 import com.liferay.ide.project.ui.ProjectUI;
 import com.liferay.ide.project.ui.dialog.JavaProjectSelectionDialog;
@@ -28,6 +29,7 @@ import com.liferay.ide.project.ui.wizard.ElementLabelProvider;
 import com.liferay.ide.ui.util.UIUtil;
 
 import java.io.File;
+import java.io.IOException;
 import java.lang.reflect.InvocationTargetException;
 import java.util.ArrayList;
 import java.util.List;
@@ -57,6 +59,7 @@ import org.eclipse.jface.viewers.StyledString.Styler;
 import org.eclipse.jface.viewers.TableViewer;
 import org.eclipse.jface.viewers.Viewer;
 import org.eclipse.jface.window.Window;
+import org.eclipse.jgit.api.errors.GitAPIException;
 import org.eclipse.sapphire.Property;
 import org.eclipse.sapphire.ValuePropertyContentEvent;
 import org.eclipse.sapphire.modeling.Path;
@@ -154,6 +157,14 @@ public abstract class AbstractLiferayTableViewCustomPart extends Page
             public void handleEvent( Event event )
             {
                 handleUpgradeEvent();
+                try
+                {
+                    RepositoryUtil.commmitAllChanges( "upgrade descriptor and layouttpl files", dataModel.getSdkLocation().toString() );
+                }
+                catch( IOException | GitAPIException e )
+                {
+                    ProjectCore.createErrorStatus( "failed to commit upgrade descriptor and layouttpl files" );
+                }
             }
         } );
 

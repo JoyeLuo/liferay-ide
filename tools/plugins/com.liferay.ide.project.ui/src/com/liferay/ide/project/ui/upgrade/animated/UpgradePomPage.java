@@ -19,12 +19,14 @@ import com.liferay.ide.core.util.CoreUtil;
 import com.liferay.ide.project.core.ProjectCore;
 import com.liferay.ide.project.core.upgrade.ILiferayLegacyProjectUpdater;
 import com.liferay.ide.project.core.util.ProjectUtil;
+import com.liferay.ide.project.core.util.RepositoryUtil;
 import com.liferay.ide.project.ui.ProjectUI;
 import com.liferay.ide.project.ui.upgrade.LiferayUpgradeCompare;
 import com.liferay.ide.ui.util.SWTUtil;
 import com.liferay.ide.ui.util.UIUtil;
 
 import java.io.File;
+import java.io.IOException;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -46,6 +48,7 @@ import org.eclipse.jface.viewers.IDoubleClickListener;
 import org.eclipse.jface.viewers.IStructuredSelection;
 import org.eclipse.jface.viewers.LabelProvider;
 import org.eclipse.jface.viewers.StyledString;
+import org.eclipse.jgit.api.errors.GitAPIException;
 import org.eclipse.swt.SWT;
 import org.eclipse.swt.events.SelectionAdapter;
 import org.eclipse.swt.events.SelectionEvent;
@@ -252,6 +255,14 @@ public class UpgradePomPage extends Page
             public void handleEvent( Event event )
             {
                 handleUpgradeEvent();
+                try
+                {
+                    RepositoryUtil.commmitAllChanges( "upgrade pom files", dataModel.getSdkLocation().toString() );
+                }
+                catch( IOException | GitAPIException e )
+                {
+                    ProjectCore.createErrorStatus( "failed to commit upgrade pom files" );
+                }
             }
         } );
 
