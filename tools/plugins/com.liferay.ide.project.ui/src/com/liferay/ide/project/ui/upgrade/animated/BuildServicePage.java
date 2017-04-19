@@ -19,6 +19,8 @@ import com.liferay.ide.core.ILiferayProject;
 import com.liferay.ide.core.LiferayCore;
 import com.liferay.ide.core.util.CoreUtil;
 import com.liferay.ide.project.core.IProjectBuilder;
+import com.liferay.ide.project.core.ProjectCore;
+import com.liferay.ide.project.core.util.RepositoryUtil;
 import com.liferay.ide.project.ui.ProjectUI;
 import com.liferay.ide.project.ui.dialog.CustomProjectSelectionDialog;
 import com.liferay.ide.project.ui.upgrade.action.CompileAction;
@@ -90,13 +92,13 @@ public class BuildServicePage extends Page
                         shardDataSourceSpringXML.delete( true, monitor );
                     }
 
-                   // for 6.2 maven project
-                   IFolder metaInfFolder = project.getFolder( "/src/main/resources/META-INF/" );
+                    // for 6.2 maven project
+                    IFolder metaInfFolder = project.getFolder( "/src/main/resources/META-INF/" );
 
-                   if( metaInfFolder.exists() )
-                   {
-                       metaInfFolder.delete( true, monitor );
-                   }
+                    if( metaInfFolder.exists() )
+                    {
+                        metaInfFolder.delete( true, monitor );
+                    }
                 }
                 catch( CoreException e )
                 {
@@ -137,7 +139,7 @@ public class BuildServicePage extends Page
 
                 dialog.setProjects( projects );
 
-                URL imageUrl = ProjectUI.getDefault().getBundle().getEntry( "/icons/e16/service.png");
+                URL imageUrl = ProjectUI.getDefault().getBundle().getEntry( "/icons/e16/service.png" );
                 Image serviceXmlImage = ImageDescriptor.createFromURL( imageUrl ).createImage();
 
                 dialog.setImage( serviceXmlImage );
@@ -184,6 +186,16 @@ public class BuildServicePage extends Page
                                         IProjectBuilder builder = liferayProject.adapt( IProjectBuilder.class );
 
                                         builder.buildService( monitor );
+                                    }
+
+                                    try
+                                    {
+                                        RepositoryUtil.commmitAllChanges(
+                                            "build service", dataModel.getSdkLocation().toString() );
+                                    }
+                                    catch( Exception e )
+                                    {
+                                        ProjectCore.createErrorStatus( "failed to build service changes." );
                                     }
 
                                     IConsole console = CompileAction.getConsole( "build-service" );
