@@ -23,6 +23,7 @@ import com.liferay.ide.project.core.ProjectCore;
 import com.liferay.ide.project.core.modules.BladeCLI;
 import com.liferay.ide.project.core.modules.ImportLiferayModuleProjectOp;
 import com.liferay.ide.project.core.modules.ImportLiferayModuleProjectOpMethods;
+import com.liferay.ide.project.core.util.RepositoryUtil;
 import com.liferay.ide.project.ui.ProjectUI;
 import com.liferay.ide.project.ui.upgrade.animated.CustomJspPage;
 import com.liferay.ide.server.core.ILiferayRuntime;
@@ -307,7 +308,8 @@ public class CustomJspConverter
         {
             hookFile = new File( sourcePath + "/src/main/webapp/WEB-INF/liferay-hook.xml" );
 
-            if( !hookFile.exists()) {
+            if( !hookFile.exists() )
+            {
                 return null;
             }
         }
@@ -389,8 +391,8 @@ public class CustomJspConverter
 
             File sourceFile = new File( sourcePath );
 
-            resultProp.setProperty( sourcePrefix + "." + sourceFile.getName(),
-                sourceFile.getName() + ":" + customJspPath );
+            resultProp.setProperty(
+                sourcePrefix + "." + sourceFile.getName(), sourceFile.getName() + ":" + customJspPath );
         }
 
         saveResultProperties();
@@ -488,7 +490,8 @@ public class CustomJspConverter
 
             projectFolder.renameTo( newFolder );
 
-            resultProp.setProperty( resultPrefix + "." + sourceProjectName + "/portalCore",
+            resultProp.setProperty(
+                resultPrefix + "." + sourceProjectName + "/portalCore",
                 newFolder.getAbsolutePath().replace( "\\\\", "/" ) );
         }
     }
@@ -511,8 +514,8 @@ public class CustomJspConverter
 
             if( fragmentPath != null && !fragmentPath.trim().isEmpty() )
             {
-                resultProp.setProperty( resultPrefix + "." + sourceFile.getName() + "/portlet/" + portlet.getName(),
-                    fragmentPath );
+                resultProp.setProperty(
+                    resultPrefix + "." + sourceFile.getName() + "/portlet/" + portlet.getName(), fragmentPath );
             }
         }
     }
@@ -552,26 +555,12 @@ public class CustomJspConverter
         jarFile.close();
     }
 
-/*    private void copyCustomJspFile(
-        String sourceJsp, String jsp, File targetJspDir, boolean isIgnore, String mappedJsp ) throws Exception
-    {
-        File srcJsp = new File( sourceJsp, jsp );
-
-        File targetJsp = null;
-
-        if( isIgnore )
-        {
-            targetJsp = new File( targetJspDir + "/.ignore/", mappedJsp );
-        }
-        else
-        {
-            targetJsp = new File( targetJspDir, mappedJsp );
-        }
-
-        makeParentDir( targetJsp );
-
-        FileUtil.copyFile( srcJsp, targetJsp );
-    }*/
+    /*
+     * private void copyCustomJspFile( String sourceJsp, String jsp, File targetJspDir, boolean isIgnore, String
+     * mappedJsp ) throws Exception { File srcJsp = new File( sourceJsp, jsp ); File targetJsp = null; if( isIgnore ) {
+     * targetJsp = new File( targetJspDir + "/.ignore/", mappedJsp ); } else { targetJsp = new File( targetJspDir,
+     * mappedJsp ); } makeParentDir( targetJsp ); FileUtil.copyFile( srcJsp, targetJsp ); }
+     */
 
     private String createEmptyJspHookProject( String portlet, String originProjectName, String targetPath )
         throws Exception
@@ -640,7 +629,7 @@ public class CustomJspConverter
         return result;
     }
 
-    public void doExecute( String[] projectPaths, String targetPath, boolean isLiferayWorkspace )
+    public void doExecute( String[] projectPaths, String targetPath, boolean isLiferayWorkspace, String sdkLocation )
     {
         Job job = new WorkspaceJob( "Converting Jsp hook to fragments..." )
         {
@@ -666,13 +655,29 @@ public class CustomJspConverter
 
                             if( importOp.validation().severity() != org.eclipse.sapphire.modeling.Status.Severity.ERROR )
                             {
-                                ImportLiferayModuleProjectOpMethods.execute( importOp,
-                                    ProgressMonitorBridge.create( monitor ) );
+                                ImportLiferayModuleProjectOpMethods.execute(
+                                    importOp, ProgressMonitorBridge.create( monitor ) );
                             }
                         }
 
                         refreshUI();
                     }
+
+                    UIUtil.sync( new Runnable()
+                    {
+                        @Override
+                        public void run()
+                        {
+                            try
+                            {
+                                RepositoryUtil.commmitAllChanges( "convert custom jsp", sdkLocation );
+                            }
+                            catch( Exception e )
+                            {
+                                ProjectCore.createErrorStatus( "failed to commit convert custom jsp" );
+                            }
+                        }
+                    } );
                 }
                 catch( Exception e )
                 {

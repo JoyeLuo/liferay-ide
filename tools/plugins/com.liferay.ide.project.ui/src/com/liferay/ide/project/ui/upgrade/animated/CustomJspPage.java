@@ -1288,7 +1288,9 @@ public class CustomJspPage extends Page
             isLiferayWorkapce = true;
         }
 
-        converter.doExecute( sourcePaths, targetPath, isLiferayWorkapce );
+        String sdkLocation = dataModel.getSdkLocation().toString();
+
+        converter.doExecute( sourcePaths, targetPath, isLiferayWorkapce,sdkLocation );
     }
 
     public void createSpecialDescriptor( Composite parent, int style )

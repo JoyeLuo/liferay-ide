@@ -195,7 +195,7 @@ public class BuildServicePage extends Page
                                     }
                                     catch( Exception e )
                                     {
-                                        ProjectCore.createErrorStatus( "failed to build service changes." );
+                                        ProjectCore.createErrorStatus( "failed to commit build service changes." );
                                     }
 
                                     IConsole console = CompileAction.getConsole( "build-service" );
