@@ -1101,7 +1101,7 @@ public class InitConfigureProjectPage extends Page implements IServerLifecycleLi
         {
             RepositoryUtil.createLocalRepository( location.toOSString() );
         }
-        catch( IOException | GitAPIException e1 )
+        catch( Exception e1 )
         {
             ProjectCore.createErrorStatus( "failed to create a local repository" );
         }
