@@ -26,7 +26,6 @@ import com.liferay.ide.ui.util.SWTUtil;
 import com.liferay.ide.ui.util.UIUtil;
 
 import java.io.File;
-import java.io.IOException;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -48,7 +47,6 @@ import org.eclipse.jface.viewers.IDoubleClickListener;
 import org.eclipse.jface.viewers.IStructuredSelection;
 import org.eclipse.jface.viewers.LabelProvider;
 import org.eclipse.jface.viewers.StyledString;
-import org.eclipse.jgit.api.errors.GitAPIException;
 import org.eclipse.swt.SWT;
 import org.eclipse.swt.events.SelectionAdapter;
 import org.eclipse.swt.events.SelectionEvent;
@@ -259,7 +257,7 @@ public class UpgradePomPage extends Page
                 {
                     RepositoryUtil.commmitAllChanges( "upgrade pom files", dataModel.getSdkLocation().toString() );
                 }
-                catch( IOException | GitAPIException e )
+                catch( Exception e )
                 {
                     ProjectCore.createErrorStatus( "failed to commit upgrade pom files" );
                 }

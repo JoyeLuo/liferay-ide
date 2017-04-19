@@ -1161,7 +1161,8 @@ public class InitConfigureProjectPage extends Page implements IServerLifecycleLi
 
                                 importSDKProject( sdkLocation, monitor );
 
-                                RepositoryUtil.commmitAllChanges( "upgrade to liferay workspace", location.toOSString() );
+                                RepositoryUtil.commmitAllChanges(
+                                    "upgrade to liferay workspace", location.toOSString() );
 
                                 dataModel.setConvertLiferayWorkspace( true );
                             }

@@ -35,8 +35,10 @@ import org.osgi.framework.ServiceReference;
 import com.liferay.blade.api.AutoMigrateException;
 import com.liferay.blade.api.AutoMigrator;
 import com.liferay.blade.api.Problem;
+import com.liferay.ide.project.core.ProjectCore;
 import com.liferay.ide.project.core.upgrade.FileProblems;
 import com.liferay.ide.project.core.upgrade.UpgradeProblems;
+import com.liferay.ide.project.core.util.RepositoryUtil;
 import com.liferay.ide.project.ui.ProjectUI;
 import com.liferay.ide.project.ui.upgrade.animated.UpgradeView;
 import com.liferay.ide.ui.util.UIUtil;
@@ -48,10 +50,12 @@ public class AutoCorrectAllAction extends Action
 {
 
     List<ProblemsContainer> _problemsContainerList;
+    String _sdkLocation;
 
-    public AutoCorrectAllAction( List<ProblemsContainer> problemsContainerList )
+    public AutoCorrectAllAction( List<ProblemsContainer> problemsContainerList, String sdkLocation )
     {
         _problemsContainerList = problemsContainerList;
+        _sdkLocation = sdkLocation;
     }
 
     public void run()
@@ -130,11 +134,29 @@ public class AutoCorrectAllAction extends Action
 
                     UIUtil.sync( new Runnable()
                     {
+
                         @Override
                         public void run()
                         {
                             IViewPart view = UIUtil.findView( UpgradeView.ID );
                             new RunMigrationToolAction( "Run Migration Tool", view.getViewSite().getShell() ).run();
+                        }
+                    } );
+
+                    UIUtil.sync( new Runnable()
+                    {
+
+                        @Override
+                        public void run()
+                        {
+                            try
+                            {
+                                RepositoryUtil.commmitAllChanges( "automatically correct problems", _sdkLocation );
+                            }
+                            catch( Exception e )
+                            {
+                                ProjectCore.createErrorStatus( "failed to commit automatically correct problems" );
+                            }
                         }
                     } );
                 }

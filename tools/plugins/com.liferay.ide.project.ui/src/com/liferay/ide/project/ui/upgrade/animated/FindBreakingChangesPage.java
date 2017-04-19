@@ -267,7 +267,7 @@ public class FindBreakingChangesPage extends Page implements IDoubleClickListene
             @Override
             public void handleEvent( Event event )
             {
-                new AutoCorrectAllAction( getInitialInput() ).run();
+                new AutoCorrectAllAction( getInitialInput(), dataModel.getSdkLocation().toString() ).run();
             }
         } );
 
