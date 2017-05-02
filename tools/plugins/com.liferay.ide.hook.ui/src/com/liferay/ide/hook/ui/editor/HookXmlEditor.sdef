@@ -97,11 +97,11 @@
                             <separator></separator>
                             <property-editor>
                                 <property>../CustomJsps</property>
+                                <show-label>true</show-label>
                                 <hint>
                                     <name>factory</name>
                                     <value>DefaultListPropertyEditorRenderer$Factory</value>
                                 </hint>
-                                <show-label>true</show-label>
                             </property-editor>
                             <separator>
                                 <label>Details</label>
@@ -178,7 +178,6 @@
                             <id>ServiceTypeImpl.Browse.Java.Type</id>
                             <description>Opens a browse dialog to list the possible service types that can be selected.
                             </description>
-                            <condition>JavaTypeBrowseActionHandlerCondition</condition>
                             <impl>ServiceTypeImplBrowseActionHandler</impl>
                             <param>
                                 <name>kind</name>
@@ -200,7 +199,6 @@
                                 <name>kind</name>
                                 <value>impl</value>
                             </param>
-                            <condition>JavaTypeBrowseActionHandlerCondition</condition>
                         </action-handler>
                     </property-editor>
                 </content>

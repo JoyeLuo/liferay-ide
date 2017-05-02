@@ -15,9 +15,15 @@
 
 package com.liferay.ide.project.ui.upgrade.animated;
 
+import java.nio.file.Paths;
 import java.util.ArrayList;
 import java.util.List;
 
+import org.eclipse.core.resources.IFile;
+import org.eclipse.core.resources.IResource;
+import org.eclipse.core.resources.ResourcesPlugin;
+import org.eclipse.core.runtime.IPath;
+import org.eclipse.core.runtime.Path;
 import org.eclipse.jface.resource.ImageDescriptor;
 import org.eclipse.jface.viewers.ISelectionChangedListener;
 import org.eclipse.jface.viewers.IStructuredContentProvider;
@@ -27,13 +33,28 @@ import org.eclipse.jface.viewers.SelectionChangedEvent;
 import org.eclipse.jface.viewers.TableViewer;
 import org.eclipse.jface.viewers.Viewer;
 import org.eclipse.swt.SWT;
+import org.eclipse.swt.events.SelectionAdapter;
+import org.eclipse.swt.events.SelectionEvent;
 import org.eclipse.swt.graphics.Image;
 import org.eclipse.swt.layout.GridData;
 import org.eclipse.swt.layout.GridLayout;
+import org.eclipse.swt.widgets.Button;
 import org.eclipse.swt.widgets.Composite;
 import org.eclipse.swt.widgets.Link;
 import org.eclipse.swt.widgets.Table;
+import org.eclipse.team.internal.ui.TeamUIPlugin;
+import org.eclipse.team.internal.ui.history.LocalHistoryPage;
+import org.eclipse.team.internal.ui.history.LocalHistoryPageSource;
+import org.eclipse.team.internal.ui.history.ShowLocalHistory;
+import org.eclipse.team.ui.TeamUI;
+import org.eclipse.team.ui.history.IHistoryPage;
+import org.eclipse.team.ui.history.IHistoryPageSource;
+import org.eclipse.team.ui.history.IHistoryView;
+import org.eclipse.ui.IWorkbenchPage;
+import org.eclipse.ui.PlatformUI;
 
+import com.liferay.blade.util.FileHelper;
+import com.liferay.ide.core.util.FileUtil;
 import com.liferay.ide.project.ui.ProjectUI;
 import com.liferay.ide.project.ui.upgrade.animated.UpgradeView.PageNavigatorListener;
 import com.liferay.ide.ui.util.SWTUtil;
@@ -90,6 +111,19 @@ public class SummaryPage extends Page implements SelectionChangedListener
         table.setLinesVisible( false );
 
         createImages();
+
+        Button logButton = new Button( container, SWT.PUSH );
+        logButton.setText( "Show Changelog" );
+        logButton.setLayoutData( new GridData( SWT.LEFT, SWT.TOP, false, false, 1, 1 ) );
+        logButton.addSelectionListener( new SelectionAdapter()
+        {
+            @Override
+            public void widgetSelected( SelectionEvent e )
+            {
+                IPath resource = new Path( "F:/eclipse dev/Liferay-IDE/eclipse/liferay-ide-1/maven" );
+                TeamUI.getHistoryView().showHistoryFor( resource );
+            }
+        } );
     }
 
     private TableViewer tableViewer;
