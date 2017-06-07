@@ -74,7 +74,7 @@ public class OSGiBundleFileSelectionDialog extends ElementTreeSelectionDialog
 
                 if( file.exists() )
                 {
-                    try( JarFile jar = new JarFile( file ) )
+                    try(JarFile jar = new JarFile( file ))
                     {
                         Enumeration<JarEntry> enu = jar.entries();
 
@@ -88,6 +88,11 @@ public class OSGiBundleFileSelectionDialog extends ElementTreeSelectionDialog
                                 name.equals( "portlet.properties" ) )
                             {
                                 possibleValues.add( name );
+                            }
+                            if( name.equals( "resource-actions/default.xml" ) )
+                            {
+                                if( !isExcludeJar( jar.getName() ) )
+                                    possibleValues.add( name );
                             }
                         }
                     }
@@ -144,10 +149,23 @@ public class OSGiBundleFileSelectionDialog extends ElementTreeSelectionDialog
         public void inputChanged( Viewer viewer, Object oldInput, Object newInput )
         {
         }
+
+        public boolean isExcludeJar( String name )
+        {
+            String[] excludeJars = { "announcements", "asset", "document", "message", "sites", "expando", "workflow" };
+            for( String str : excludeJars )
+            {
+                if( name.contains( str ) )
+                    return true;
+            }
+            return false;
+        }
+
     }
 
     protected static class FileLabelProvider extends LabelProvider
     {
+
         private final Image IMG_FILE =
             PlatformUI.getWorkbench().getSharedImages().getImage( ISharedImages.IMG_OBJ_FILE );
 
