@@ -101,6 +101,27 @@ public class NewModuleFragmentFilesOpMethods
 
                         FileUtil.copyFileToDir( fragmentFile, "portlet-ext.properties", folder );
                     }
+                    else if( fragmentFile.getName().equals( "resource-actions/default.xml" ) )
+                    {
+                        String parent = fragmentFile.getParentFile().getPath();
+                        parent = parent.replaceAll( "\\\\", "/" );
+                        String metaInfResources = "resource-actions";
+
+                        parent = parent.substring( parent.indexOf( metaInfResources ) + metaInfResources.length() );
+
+                        IPath resources = project.getLocation().append( "src/main/resources/resource-actions" );
+
+                        folder = resources.toFile();
+                        folder.mkdirs();
+
+                        if( !parent.equals( "resource-action" ) && !parent.equals( "" ) )
+                        {
+                            folder = resources.append( parent ).toFile();
+                            folder.mkdirs();
+                        }
+
+                        FileUtil.copyFileToDir( fragmentFile, folder );
+                    }
                     else
                     {
                         String parent = fragmentFile.getParentFile().getPath();

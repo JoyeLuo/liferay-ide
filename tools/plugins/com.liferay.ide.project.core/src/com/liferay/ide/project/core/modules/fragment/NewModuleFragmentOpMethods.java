@@ -25,7 +25,11 @@ import com.liferay.ide.server.core.LiferayServerCore;
 import com.liferay.ide.server.core.portal.PortalBundle;
 import com.liferay.ide.server.util.ServerUtil;
 
+import java.io.BufferedWriter;
 import java.io.File;
+import java.io.FileNotFoundException;
+import java.io.FileReader;
+import java.io.FileWriter;
 import java.io.IOException;
 import java.util.List;
 
@@ -108,6 +112,46 @@ public class NewModuleFragmentOpMethods
                     folder = location.append( projectName ).append( "src/main/java" ).toFile();
 
                     FileUtil.copyFileToDir( fragmentFile, "portlet-ext.properties", folder );
+                }
+                else if( fragmentFile.getName().contains( "default.xml" ) )
+                {
+                    String parent = fragmentFile.getParentFile().getPath();
+                    parent = parent.replaceAll( "\\\\", "/" );
+                    String metaInfResources = "resource-actions";
+
+                    parent = parent.substring( parent.indexOf( metaInfResources ) + metaInfResources.length() );
+
+                    IPath resources = location.append( projectName ).append( "src/main/resources/resource-actions" );
+
+                    folder = resources.toFile();
+                    folder.mkdirs();
+
+                    if( !parent.equals( "resource-actions" ) && !parent.equals( "" ) )
+                    {
+                        folder = resources.append( parent ).toFile();
+                        folder.mkdirs();
+                    }
+
+                    FileUtil.copyFileToDir( fragmentFile, "default-ext.xml", folder );
+
+                    try
+                    {
+                        File ext = new File(
+                            location.append( projectName ).append( "src/main/resources" ) + "/portlet-ext.properties" );
+                        ext.createNewFile();
+                        FileUtil.writeFile(
+                            ext,
+                            "resource.actions.configs=resource-actions/default.xml,resource-actions/default-ext.xml",
+                            null );
+                    }
+                    catch( IOException e )
+                    {
+                        e.printStackTrace();
+                    }
+                    catch( CoreException e )
+                    {
+                        e.printStackTrace();
+                    }
                 }
                 else
                 {
