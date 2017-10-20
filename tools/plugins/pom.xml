@@ -62,5 +62,6 @@
         <module>com.liferay.ide.upgrade.core</module>
         <module>com.liferay.ide.upgrade.ui</module>
         <module>com.liferay.ide.xml.search.ui</module>
+        <module>com.liferay.ide.editor.ui</module>
     </modules>
 </project>
