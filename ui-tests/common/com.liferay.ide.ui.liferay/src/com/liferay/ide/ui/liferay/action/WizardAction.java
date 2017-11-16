@@ -174,9 +174,26 @@ public class WizardAction extends UIAction {
 		_newLiferayComponentWizard.getProjectNames().setSelection(projectName);
 	}
 
-	public void prepareComponentClass(String projectName, String componentClassTemplate) {
+	public void prepareComponentClass(String projectName, String template) {
 		_newLiferayComponentWizard.getProjectNames().setSelection(projectName);
-		_newLiferayComponentWizard.getComponentClassTemplates().setSelection(componentClassTemplate);
+		_newLiferayComponentWizard.getComponentClassTemplates().setSelection(template);
+
+		ide.sleep();
+	}
+
+	public void prepareComponentClass(String projectName, String template, String className) {
+		_newLiferayComponentWizard.getProjectNames().setSelection(projectName);
+		_newLiferayComponentWizard.getComponentClassTemplates().setSelection(template);
+		_newLiferayComponentWizard.getComponentClassName().setText(className);
+
+		ide.sleep();
+	}
+
+	public void prepareComponentClass(String projectName, String template, String className, String packageName) {
+		_newLiferayComponentWizard.getProjectNames().setSelection(projectName);
+		_newLiferayComponentWizard.getComponentClassTemplates().setSelection(template);
+		_newLiferayComponentWizard.getComponentClassName().setText(className);
+		_newLiferayComponentWizard.getPackageName().setText(packageName);
 
 		ide.sleep();
 	}
@@ -371,12 +388,16 @@ public class WizardAction extends UIAction {
 	}
 
 	public void prepareNewServer62(String serverName) {
+		ide.sleep();
+
 		_newServerWizard.getServerName().setText(serverName);
 
 		_newServerWizard.getServerTypes().selectTreeItem(LIFERAY_INC, LIFERAY_V_62_SERVER_TOMCAT_7);
 	}
 
 	public void prepareRuntimeType(String category, String type) {
+		ide.sleep();
+
 		_newRuntimeWizard.getServerTypes().selectTreeItem(category, type);
 	}
 

@@ -21,4 +21,5 @@ Export-Package: com.liferay.ide.kaleo.core,
  com.liferay.ide.kaleo.core.model,
  com.liferay.ide.kaleo.core.op,
  com.liferay.ide.kaleo.core.util
+Import-Package: org.eclipse.help.internal.base.util
 
