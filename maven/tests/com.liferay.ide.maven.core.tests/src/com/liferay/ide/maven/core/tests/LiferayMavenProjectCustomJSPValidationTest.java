@@ -28,7 +28,6 @@ import org.eclipse.m2e.core.MavenPlugin;
 import org.eclipse.m2e.core.project.IMavenProjectFacade;
 import org.eclipse.m2e.core.project.IProjectConfigurationManager;
 import org.eclipse.m2e.core.project.MavenUpdateRequest;
-import org.junit.Ignore;
 import org.junit.Test;
 
 /**
@@ -36,12 +35,10 @@ import org.junit.Test;
  * @author Gregory Amerson
  */
 @SuppressWarnings( "restriction" )
-@Ignore
 public class LiferayMavenProjectCustomJSPValidationTest extends LiferayMavenProjectTestCase
 {
 
     @Test
-    @Ignore
     public void testCustomJspValidationConfigured() throws Exception
     {
         final IEclipsePreferences prefs = InstanceScope.INSTANCE.getNode( LiferayMavenCore.PLUGIN_ID );;
@@ -76,8 +73,7 @@ public class LiferayMavenProjectCustomJSPValidationTest extends LiferayMavenProj
         project.delete( true, monitor );
     }
 
-    @Test
-    @Ignore
+    @Test    
     public void testCustomJspValidationDefaults() throws Exception
     {
         final IEclipsePreferences prefs = DefaultScope.INSTANCE.getNode( LiferayMavenCore.PLUGIN_ID );;
@@ -85,8 +81,7 @@ public class LiferayMavenProjectCustomJSPValidationTest extends LiferayMavenProj
         assertTrue( prefs.getBoolean( LiferayMavenCore.PREF_DISABLE_CUSTOM_JSP_VALIDATION, false ) );
     }
 
-    @Test
-    @Ignore
+    @Test    
     public void testNoCustomJspValidationConfigured() throws Exception
     {
         final IEclipsePreferences prefs = InstanceScope.INSTANCE.getNode( LiferayMavenCore.PLUGIN_ID );;

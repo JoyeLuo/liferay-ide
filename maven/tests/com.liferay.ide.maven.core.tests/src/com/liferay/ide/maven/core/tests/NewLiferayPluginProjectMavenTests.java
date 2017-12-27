@@ -127,7 +127,6 @@ public class NewLiferayPluginProjectMavenTests extends ProjectCoreBase
     }
 
     @Test
-    @Ignore
     public void testLocationValidation() throws Exception
     {
         final NewLiferayPluginProjectOp op = newProjectOp( "test-location-validation-service" );
