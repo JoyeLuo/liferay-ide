@@ -12,33 +12,24 @@
  * details.
  */
 
-package com.liferay.ide.ui.liferay.base;
+package com.liferay.ide.ui.liferay.page.wizard;
 
-import org.eclipse.swtbot.eclipse.finder.SWTWorkbenchBot;
+import com.liferay.ide.ui.swtbot.page.ComboBox;
+import com.liferay.ide.ui.swtbot.page.Wizard;
+
+import org.eclipse.swtbot.swt.finder.SWTBot;
 
 /**
- * @author Terry Jia
+ * @author Haoyi Sun
  */
-public class TimestampSupport extends SupportBase {
+public class MakeTaskAssignScriptWizard extends Wizard {
 
-	public TimestampSupport(SWTWorkbenchBot bot) {
-		super(bot);
+	public MakeTaskAssignScriptWizard(SWTBot bot) {
+		super(bot, 1);
 	}
 
-	@Override
-	public void after() {
-		_timestamp = 0;
+	public ComboBox getScriptLanguage() {
+		return new ComboBox(bot, SCRIPT_LANGUAGE);
 	}
-
-	@Override
-	public void before() {
-		_timestamp = System.currentTimeMillis();
-	}
-
-	public String getName(String name) {
-		return name + "-" + _timestamp;
-	}
-
-	private long _timestamp = 0;
 
 }

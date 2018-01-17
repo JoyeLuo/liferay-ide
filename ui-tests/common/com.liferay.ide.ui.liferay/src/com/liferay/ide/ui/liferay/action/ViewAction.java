@@ -71,11 +71,11 @@ public class ViewAction extends UIAction {
 		}
 
 		public void restartUpgrade() {
-			_codeUpgradeView.getRestartUpgradeBtn().click();
+			_codeUpgradeView.clickRestartUpgradeBtn();
 		}
 
 		public void showAllPages() {
-			_codeUpgradeView.getShowAllPagesBtn().click();
+			_codeUpgradeView.clickShowAllPagesBtn();
 		}
 
 		public void switchGear(int index) {
@@ -284,9 +284,7 @@ public class ViewAction extends UIAction {
 		public void stop(String serverLabel) {
 			ide.sleep(2000);
 
-			_serversView.getServers().select(serverLabel);
-
-			_serversView.clickStopBtn();
+			_serversView.getServers().contextMenu(STOP, serverLabel);
 		}
 
 		public boolean visibleModuleTry(String serverLabel, String projectName) {
