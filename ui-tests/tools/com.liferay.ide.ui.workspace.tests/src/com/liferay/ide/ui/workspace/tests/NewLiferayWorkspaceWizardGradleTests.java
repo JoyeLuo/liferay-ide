@@ -17,6 +17,8 @@ package com.liferay.ide.ui.workspace.tests;
 import com.liferay.ide.ui.liferay.SwtbotBase;
 import com.liferay.ide.ui.liferay.support.project.ProjectSupport;
 
+import static org.junit.Assert.assertTrue;
+
 import org.junit.Assert;
 import org.junit.Ignore;
 import org.junit.Rule;
@@ -66,6 +68,25 @@ public class NewLiferayWorkspaceWizardGradleTests extends SwtbotBase {
 		String newFolderName = "changeLocation";
 
 		wizardAction.newLiferayWorkspace.location().setText(workspacePath + "/" + newFolderName);
+
+		wizardAction.finish();
+
+		viewAction.project.closeAndDelete(project.getName());
+	}
+
+	@Test
+	public void createLiferayWorkspaceChooseVersion71() {
+		wizardAction.openNewLiferayWorkspaceWizard();
+
+		wizardAction.newLiferayWorkspace.selectDownloadLiferayBundle();
+
+		wizardAction.newLiferayWorkspace.prepareGradle(project.getName(), "7.1");
+
+		String bundleUrl = wizardAction.newLiferayWorkspace.getBundleUrl();
+
+		assertTrue(bundleUrl.contains("7.1"));
+
+		wizardAction.newLiferayWorkspace.deselectDownloadLiferayBundle();
 
 		wizardAction.finish();
 
