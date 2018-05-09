@@ -211,6 +211,8 @@ public class LiferayUIPlugin extends AbstractUIPlugin implements IStartup {
 
 		_addRepository();
 
+		_enableGradleAutoSync();
+
 		_plugin = this;
 
 		_serviceListener = new ServiceListener() {
@@ -454,6 +456,28 @@ public class LiferayUIPlugin extends AbstractUIPlugin implements IStartup {
 					contextType.addResolver(new ServiceClassNameResolver());
 				}
 			}
+		}
+	}
+
+	private void _enableGradleAutoSync() {
+		IEclipsePreferences gradlePrefs = InstanceScope.INSTANCE.getNode("org.eclipse.buildship.core");
+
+		String autoSync = "auto.sync";
+
+		try {
+			String[] gradlePrefsKeys = gradlePrefs.keys();
+
+			Stream<String> gradlePrefsKeysSteam = Stream.of(gradlePrefsKeys);
+
+			boolean exist = gradlePrefsKeysSteam.anyMatch(gradlePrefsKey -> Objects.equals(gradlePrefsKey, autoSync));
+
+			if (!exist) {
+				gradlePrefs.putBoolean(autoSync, true);
+
+				gradlePrefs.flush();
+			}
+		}
+		catch (BackingStoreException bse) {
 		}
 	}
 
